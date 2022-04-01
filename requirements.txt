@@ -1,0 +1,11 @@
+jupyter
+ipykernel
+numpy
+pandas
+matplotlib
+scikit-learn
+scipy
+galileo-db==0.10.2.dev1
+mysql-connector-python==8.0.16
+python-dotenv
+influxdb-client
