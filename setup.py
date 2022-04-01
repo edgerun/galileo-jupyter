@@ -22,9 +22,9 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="galileo-jupyter",
-    version="0.0.1.dev6",
-    author="Thomas Rausch",
-    author_email="t.rausch@dsg.tuwien.ac.at",
+    version="0.0.1",
+    author="Thomas Rausch, Philipp Raith",
+    author_email="t.rausch@dsg.tuwien.ac.at, p.raith@dsg.tuwien.ac.at",
     description="Galileo Jupyter: Tools for analyzing galileo experiments",
     long_description=long_description,
     long_description_content_type="text/markdown",
