@@ -11,6 +11,7 @@ galileo-db==0.10.4.dev1
 mysql-connector-python==8.0.16
 python-dotenv==0.20.0
 influxdb_client==1.20.0
+SQLAlchemy==1.4.39
 
 edgerun-skippy-core==0.1.1
 edgerun-faas==0.0.1.dev2

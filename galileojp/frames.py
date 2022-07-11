@@ -54,7 +54,13 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
 
     @property
     def _sql_con(self):
-        return self.sqldb.db
+        user = self.sqldb.db.connect_kwargs['user']
+        password = self.sqldb.db.connect_kwargs['password']
+        host = self.sqldb.db.connect_kwargs['host']
+        port = self.sqldb.db.connect_kwargs['port']
+        db = self.sqldb.db.connect_kwargs['db']
+        sql_connect_string = f'mysql+mysqlconnector://{user}:{password}@{host}:{port}/{db}'
+        return sql_connect_string
 
     @property
     def _influxdb_client(self):
