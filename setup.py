@@ -28,7 +28,7 @@ setuptools.setup(
     description="Galileo Jupyter: Tools for analyzing galileo experiments",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://git.dsg.tuwien.ac.at/mc2/galileo-jupyter",
+    url="https://github.com/edgerun/galileo-jupyter",
     packages=setuptools.find_packages(),
     test_suite="tests",
     tests_require=tests_require,
