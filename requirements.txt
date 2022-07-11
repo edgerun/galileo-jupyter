@@ -4,11 +4,14 @@ notebook==6.4.10
 jupyterlab==3.3.2
 matplotlib==3.5.1
 numpy==1.22.3
-pandas==1.4.1
+pandas>=1.4.3
 scikit-learn==1.0.2
 scipy==1.8.0
-galileo-db==0.10.4
+galileo-db==0.10.4.dev1
 mysql-connector-python==8.0.16
 python-dotenv==0.20.0
 influxdb_client==1.20.0
 
+edgerun-skippy-core==0.1.1
+edgerun-faas==0.0.1.dev2
+edgerun-galileo-faas==0.0.1.dev2
