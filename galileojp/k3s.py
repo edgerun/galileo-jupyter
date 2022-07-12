@@ -656,6 +656,23 @@ class K3SGateway(MixedExperimentFrameGateway):
             df['blkio_rate'] = (df['value'].diff() / d) / 1_000
         return df
 
+    def get_network_rate_container(self, exp_id: str, container_id: str) -> Optional[pd.DataFrame]:
+        """
+        Calculate the  network rate for the given container. This combines read + writes.
+        The rate depends on the interval of the corresponding telemd instrument.
+        Assuming that it's set to 1s, the resulting data rate is kbyte/s.
+        The time component varies depending on the interval.
+        """
+        df = self._get_influxdb_df_metric_subsystem('kubernetes_cgrp_net', container_id, exp_id)
+        if df is None:
+            return None
+        if len(df) >= 2:
+            d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
+            # diff and map to kbyte
+            df['net_rate'] = (df['value'].diff() / d) / 1_000
+        return df
+
+
     def preprocessed_telemetry(self, exp_id):
         telemetry = self.telemetry(exp_id)
         telemetry.index = self.normalize_index(telemetry.index, exp_id)
