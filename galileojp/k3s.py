@@ -553,26 +553,6 @@ class K3SGateway(MixedExperimentFrameGateway):
         df.index = self.normalize_index(df.index, exp_id)
         return df
 
-    def get_cpu_container(self, exp_id: str, container_id: str, absolute: bool = True) -> Optional[pd.DataFrame]:
-        df = self._get_influxdb_df_metric_subsystem('kubernetes_cgrp_cpu', container_id, exp_id)
-        nodes = self.get_nodes_by_name(exp_id)
-        replicas_by_id = self.get_replica_by_container_id(exp_id)
-        node = replicas_by_id[container_id].node_name
-        node = nodes.get(node, None)
-        if node is None:
-            return None
-        cores = node.cpus
-        if df is None:
-            return None
-        if len(df) >= 2:
-            d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
-            df['value_ms'] = df['value'] / 1e6
-            df['milli_cores'] = (df['value_ms'].diff() / d)
-            df['percentage'] = df['milli_cores'] / 10
-            df['percentage_relative'] = df['milli_cores'] / (10 * (cores * 100))
-
-        return df
-
     def get_cpu_containers_by_name(self, exp_id: str, container_pattern: str, absolute: bool = True) -> pd.DataFrame:
         exp_replicas = self.get_replicas(exp_id)
         containers_df = exp_replicas[exp_replicas['name'].str.contains(container_pattern)]
@@ -641,6 +621,40 @@ class K3SGateway(MixedExperimentFrameGateway):
             replicas_of_function = replicas_of_function[replicas_of_function['shutdown_ts'] > now]
             replicas_by_function_name[deployment.fn.name] = replicas_of_function
         return replicas_by_function_name
+
+    def get_cpu_container(self, exp_id: str, container_id: str, absolute: bool = True) -> Optional[pd.DataFrame]:
+        df = self._get_influxdb_df_metric_subsystem('kubernetes_cgrp_cpu', container_id, exp_id)
+        nodes = self.get_nodes_by_name(exp_id)
+        replicas_by_id = self.get_replica_by_container_id(exp_id)
+        node = replicas_by_id[container_id].node_name
+        node = nodes.get(node, None)
+        if node is None:
+            return None
+        cores = node.cpus
+        if df is None:
+            return None
+        if len(df) >= 2:
+            d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
+            df['value_ms'] = df['value'] / 1e6
+            df['milli_cores'] = (df['value_ms'].diff() / d)
+            df['percentage'] = df['milli_cores'] / 10
+            df['percentage_relative'] = df['milli_cores'] / (10 * (cores * 100))
+
+        return df
+
+    def get_blkio_rate_container(self, exp_id: str, container_id: str) -> Optional[pd.DataFrame]:
+        """
+        Calculate the blkio rate for the given container.
+        The rate depends on the interval of the corresponding telemd instrument.
+        Assuming that it's set to 1s, the resulting data rate is kbyte/s.
+        The time component varies depending on the interval.
+        """
+        df = self._get_influxdb_df_metric_subsystem('kubernetes_cgrp_blkio', container_id, exp_id)
+        if len(df) >= 2:
+            d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
+            # diff and map to kbyte
+            df['blkio_rate'] = (df['value'].diff() / d) / 1_000
+        return df
 
     def preprocessed_telemetry(self, exp_id):
         telemetry = self.telemetry(exp_id)
