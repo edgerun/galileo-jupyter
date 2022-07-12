@@ -654,6 +654,9 @@ class K3SGateway(MixedExperimentFrameGateway):
             d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
             # diff and map to kbyte
             df['blkio_rate'] = (df['value'].diff() / d) / 1_000
+        exp = self.get_experiment(exp_id)
+        df['ts'] = df['ts'].astype(float)
+        df['ts'] -= exp.START.iloc[0]
         return df
 
     def get_network_rate_container(self, exp_id: str, container_id: str) -> Optional[pd.DataFrame]:
@@ -670,6 +673,10 @@ class K3SGateway(MixedExperimentFrameGateway):
             d = (float(df['ts'].iloc[1]) - float(df['ts'].iloc[0]))
             # diff and map to kbyte
             df['net_rate'] = (df['value'].diff() / d) / 1_000
+
+        exp = self.get_experiment(exp_id)
+        df['ts'] = df['ts'].astype(float)
+        df['ts'] -= exp.START.iloc[0]
         return df
 
 
