@@ -6,6 +6,7 @@ import re
 from collections import defaultdict
 from typing import Dict, Optional, List
 
+import numpy as np
 import pandas as pd
 from faas.context import NodeService, FunctionDeploymentService, InMemoryNodeService, InMemoryDeploymentService
 from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment
@@ -641,7 +642,11 @@ class K3SGateway(MixedExperimentFrameGateway):
             replicas_by_function_name[deployment.fn.name] = replicas_of_function
         return replicas_by_function_name
 
-
+    def preprocessed_telemetry(self, exp_id):
+        telemetry = self.telemetry(exp_id)
+        telemetry.index = self.normalize_index(telemetry.index, exp_id)
+        telemetry['ts'] = telemetry.index.to_series().apply(lambda x: x.timestamp())
+        return telemetry
 
     def get_replicas_by_deployments(self, exp_id, deployments: List[KubernetesFunctionDeployment]) -> Dict[str, pd.DataFrame]:
         replicas = self.get_replicas(exp_id)
