@@ -613,25 +613,25 @@ class K3SGateway(MixedExperimentFrameGateway):
         return running_replicas
 
 
-    def get_cpu(self, exp_id, replicas: pd.DataFrame, gw):
+    def get_cpu(self, exp_id, replicas: pd.DataFrame):
         dfs = []
         for _, row in replicas.iterrows():
-            df = gw.get_cpu_container(exp_id, row['container_id'])
+            df = self.get_cpu_container(exp_id, row['container_id'])
             if df is not None:
                 df.index = self.normalize_index(df.index, exp_id)
-                exp = gw.get_experiment(exp_id)
+                exp = self.get_experiment(exp_id)
                 df['ts'] = df['ts'].astype(float)
                 df['ts'] -= exp.START.iloc[0]
                 dfs.append(df)
         return pd.concat(dfs)
 
 
-    def get_gateways_replicas(self, exp_id, gw):
+    def get_gateways_replicas(self, exp_id):
         replicas = self.get_replicas(exp_id)
         return replicas[replicas['pod_type'] == 'api-gateway']
 
 
-    def get_running_replicas(self, exp_id, deployments: List[FunctionDeployment], now: float, gw):
+    def get_running_replicas(self, exp_id, deployments: List[FunctionDeployment], now: float):
         replicas = self.get_replicas_with_shutdown(exp_id)
 
         replicas_by_function_name = {}
