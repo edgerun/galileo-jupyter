@@ -6,7 +6,6 @@ import re
 from collections import defaultdict
 from typing import Dict, Optional, List
 
-import numpy as np
 import pandas as pd
 from faas.context import NodeService, FunctionDeploymentService, InMemoryNodeService, InMemoryDeploymentService
 from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment
@@ -37,8 +36,6 @@ def parse_cpu_millis(cpu: str) -> int:
         # in case resource request is 1 (== 1 core) == 1000m
         return cpu * 1000
     return cpu
-
-
 
 
 def get_zone_from_client(client: str) -> str:
@@ -128,7 +125,6 @@ class K3SGateway(MixedExperimentFrameGateway):
                 namespace=namespace,
                 deployment=fn_deployment
             ))
-
 
         return InMemoryDeploymentService[KubernetesFunctionDeployment](list(deployments.values()))
 
@@ -573,8 +569,6 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         return pd.concat(dfs)
 
-
-
     def get_replicas_with_shutdown(self, exp_id) -> pd.DataFrame:
         exp = self.get_experiment(exp_id)
         end_ts = exp.iloc[0]['END'] - exp.iloc[0]['START']
@@ -592,7 +586,6 @@ class K3SGateway(MixedExperimentFrameGateway):
         running_replicas['shutdown_ts'] = running_replicas.apply(apply, axis=1)
         return running_replicas
 
-
     def get_cpu(self, exp_id, replicas: pd.DataFrame):
         dfs = []
         for _, row in replicas.iterrows():
@@ -605,11 +598,9 @@ class K3SGateway(MixedExperimentFrameGateway):
                 dfs.append(df)
         return pd.concat(dfs)
 
-
     def get_gateways_replicas(self, exp_id):
         replicas = self.get_replicas(exp_id)
         return replicas[replicas['pod_type'] == 'api-gateway']
-
 
     def get_running_replicas(self, exp_id, deployments: List[FunctionDeployment], now: float):
         replicas = self.get_replicas_with_shutdown(exp_id)
@@ -679,14 +670,30 @@ class K3SGateway(MixedExperimentFrameGateway):
         df['ts'] -= exp.START.iloc[0]
         return df
 
-
     def preprocessed_telemetry(self, exp_id):
+        """
+        Fetches all telemetry and does the following things:
+        * Normalizes the date time index (i.e., maps the start of the beginning to 0)
+        * Converts kubernetes_cgrp_memory and docker_cgrp_memory to Megabyte from Byte
+        :param exp_id:
+        :return:
+        """
         telemetry = self.telemetry(exp_id)
         telemetry.index = self.normalize_index(telemetry.index, exp_id)
         telemetry['ts'] = telemetry.index.to_series().apply(lambda x: x.timestamp())
+
+        mask = telemetry['metric'] == 'kubernetes_cgrp_memory'
+        memory = telemetry[mask]
+        telemetry.loc[mask, 'value'] = (memory['value'] / 1e6)
+
+        mask = telemetry['metric'] == 'docker_cgrp_memory'
+        memory = telemetry[mask]
+        telemetry.loc[mask, 'value'] = (memory['value'] / 1e6)
+
         return telemetry
 
-    def get_replicas_by_deployments(self, exp_id, deployments: List[KubernetesFunctionDeployment]) -> Dict[str, pd.DataFrame]:
+    def get_replicas_by_deployments(self, exp_id, deployments: List[KubernetesFunctionDeployment]) -> Dict[
+        str, pd.DataFrame]:
         replicas = self.get_replicas(exp_id)
         data = {}
         for deployment in deployments:
