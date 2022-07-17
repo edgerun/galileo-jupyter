@@ -497,27 +497,6 @@ class K3SGateway(MixedExperimentFrameGateway):
         df.index = self.normalize_index(df.index, exp_id)
         return df
 
-    def get_cpu_usage_results(self, exp_id: str) -> pd.DataFrame:
-        stop = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-        stop = stop.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        query = f"""
-        from(bucket: "{exp_id}")
-          |> range(start: 1970-01-01, stop: {stop})
-          |> filter(fn: (r) => r["_measurement"] == "events")
-          |> filter(fn: (r) => r["name"] == "cpu_usage_pressure")
-        """
-        data = defaultdict(list)
-        for value in self.raw_influxdb_query(query)['_value']:
-            obj = json.loads(value)
-            for k in obj.keys():
-                data[k].append(obj[k])
-            cluster = self.convert_cluster(obj['zone'])
-            data['cluster'].append(cluster)
-        df = pd.DataFrame(data=data)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df['ts'], unit='s'))
-        df.index = self.normalize_index(df.index, exp_id)
-        return df
-
     @staticmethod
     def from_env() -> 'K3SGateway':
         env.load()
