@@ -430,7 +430,9 @@ class K3SGateway(MixedExperimentFrameGateway):
             lower_case_dict = {}
             for key, value in headers.items():
                 lower_case_dict[key.lower()] = value
-            last_forward_at = float(lower_case_dict[f'x-forwarded-host-{last_gateway}']) - start_trace
+            last_forward = lower_case_dict[f'x-forwarded-host-{last_gateway}']
+            last_forward = last_forward.split(',')[-1].replace(' ', '')
+            last_forward_at = float(last_forward) - start_trace
             traces.loc[index, 'latency_gateway'] = ((last_forward_at - row['sent']) * 2) * 1000
             if int(row['status']) == 200:
                 start = float(headers['X-Start']) - start_trace
@@ -702,3 +704,11 @@ class K3SGateway(MixedExperimentFrameGateway):
         b = datetime.datetime.fromisoformat('1970-01-01')
         c = a - b
         return idx - c
+
+import seaborn as sns
+
+if __name__ == '__main__':
+    exp_id = '202207171754-2703'
+    gw = K3SGateway.from_env()
+    traces = gw.traces(exp_id)
+    pass
