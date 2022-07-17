@@ -619,7 +619,8 @@ class K3SGateway(MixedExperimentFrameGateway):
             df['value_ms'] = df['value'] / 1e6
             df['milli_cores'] = (df['value_ms'].diff() / d)
             df['percentage'] = df['milli_cores'] / 10
-            df['percentage_relative'] = df['milli_cores'] / (10 * (cores * 100))
+            # at the end * 100 to get percentage between [0,100]
+            df['percentage_relative'] = (df['milli_cores'] / (10 * (cores * 100))) * 100
 
         return df
 
