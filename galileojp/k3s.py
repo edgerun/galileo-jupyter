@@ -706,15 +706,3 @@ class K3SGateway(MixedExperimentFrameGateway):
         b = datetime.datetime.fromisoformat('1970-01-01')
         c = a - b
         return idx - c
-
-import seaborn as sns
-
-if __name__ == '__main__':
-    exp_id = '202207171822-7f6d'
-    gw = K3SGateway.from_env()
-    traces = gw.get_replica_schedule_statistics(exp_id, 'mobilenet',per_second=False)
-    # df = traces.groupby('cluster').resample('1S', on="ts").mean()
-    df = traces
-    df = df.sort_values(by='cluster')
-    sns.lineplot(x='ts', y='cluster_total', data=df.reset_index(), style='cluster', hue='cluster', markers=True)
-    plt.show()
