@@ -17,6 +17,7 @@ from galileofaas.context.platform.replica.model import parse_function_replica, K
 from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDeployment, \
     KubernetesResourceConfiguration
 from galileofaas.util.storage import parse_size_string_to_bytes
+from matplotlib import pyplot as plt
 from skippy.core.model import ResourceRequirements
 
 from galileojp import env
@@ -247,11 +248,13 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         return pd.DataFrame(data=data).sort_values(by='ts')
 
-    def get_pod_schedules_statistics(self, exp_id, deployment_pattern: str = 'busy', clusters: List[str] = None):
+    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None):
         if clusters is None:
             clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
-        sc_df = self.get_replicas(exp_id, None)
-        sc_df = sc_df[sc_df['image'].str.contains('busy')]
+        sc_df_running = self.get_replicas(exp_id, state='running')
+        sc_df_delete = self.get_replicas(exp_id, state='delete')
+        sc_df = pd.concat([sc_df_running, sc_df_delete])
+        sc_df = sc_df[sc_df['image'].str.contains(fn)]
 
         def rindex(mylist, myvalue):
             return len(mylist) - mylist[::-1].index(myvalue) - 1
