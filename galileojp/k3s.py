@@ -613,11 +613,22 @@ class K3SGateway(MixedExperimentFrameGateway):
             replicas_by_function_name[deployment.fn.name] = replicas_of_function
         return replicas_by_function_name
 
-    def get_cpu_container(self, exp_id: str, container_id: str, absolute: bool = True) -> Optional[pd.DataFrame]:
+    def get_cpu_container(self, exp_id: str, container_id: str, absolute: bool = True) -> Optional[
+        pd.DataFrame]:
         df = self._get_influxdb_df_metric_subsystem('kubernetes_cgrp_cpu', container_id, exp_id)
         nodes = self.get_nodes_by_name(exp_id)
-        replicas_by_id = self.get_replica_by_container_id(exp_id)
-        node = replicas_by_id[container_id].node_name
+        raw_replicas = self.get_raw_replicas(exp_id)
+        node = None
+        for idx, row in raw_replicas.iterrows():
+            obj = json.loads(row['_value'])
+            for v in obj['containers'].values():
+                parsed_container_id = v['id'].replace('containerd://', '')
+                if container_id == parsed_container_id:
+                    node = obj['nodeName']
+                break
+            if node is not None:
+                break
+
         node = nodes.get(node, None)
         if node is None:
             return None
