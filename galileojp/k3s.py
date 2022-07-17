@@ -248,13 +248,13 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         return pd.DataFrame(data=data).sort_values(by='ts')
 
-    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None):
+    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None,per_second:bool= True):
         if clusters is None:
             clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
         sc_df_running = self.get_replicas(exp_id, state='running')
         sc_df_delete = self.get_replicas(exp_id, state='delete')
         sc_df = pd.concat([sc_df_running, sc_df_delete])
-        sc_df = sc_df[sc_df['image'].str.contains(fn)]
+        sc_df = sc_df[sc_df['image'].str.contains(fn)].sort_values(by='ts')
 
         def rindex(mylist, myvalue):
             return len(mylist) - mylist[::-1].index(myvalue) - 1
@@ -283,16 +283,18 @@ class K3SGateway(MixedExperimentFrameGateway):
             ts = row['ts']
             last_ts = data['ts'][-1]
             diff = ts - last_ts
-
-            for i in range(0, math.floor(diff), 1):
-                for cluster in ['Cloud', 'IoT-Box', 'Cloudlet']:
-                    data['ts'].append(last_ts + i)
-                    data['total'].append(data['total'][-1])
-                    idx = rindex(data['cluster'], cluster)
-                    data['cluster'].append(cluster)
-                    data['cluster_total'].append(data['cluster_total'][idx])
-
             cluster = row['cluster']
+
+            if per_second:
+                for i in range(0, math.floor(diff), 1):
+                    for other_cluster in ['Cloud', 'IoT-Box', 'Cloudlet']:
+                        if other_cluster != cluster:
+                            data['ts'].append(last_ts + i)
+                            data['total'].append(data['total'][-1])
+                            idx = rindex(data['cluster'], other_cluster)
+                            data['cluster'].append(other_cluster)
+                            data['cluster_total'].append(data['cluster_total'][idx])
+
             data['cluster'].append(cluster)
             data['ts'].append(ts)
             total = data['total'][-1]
@@ -704,3 +706,15 @@ class K3SGateway(MixedExperimentFrameGateway):
         b = datetime.datetime.fromisoformat('1970-01-01')
         c = a - b
         return idx - c
+
+import seaborn as sns
+
+if __name__ == '__main__':
+    exp_id = '202207171822-7f6d'
+    gw = K3SGateway.from_env()
+    traces = gw.get_replica_schedule_statistics(exp_id, 'mobilenet',per_second=False)
+    # df = traces.groupby('cluster').resample('1S', on="ts").mean()
+    df = traces
+    df = df.sort_values(by='cluster')
+    sns.lineplot(x='ts', y='cluster_total', data=df.reset_index(), style='cluster', hue='cluster', markers=True)
+    plt.show()
