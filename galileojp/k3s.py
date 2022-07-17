@@ -704,11 +704,3 @@ class K3SGateway(MixedExperimentFrameGateway):
         b = datetime.datetime.fromisoformat('1970-01-01')
         c = a - b
         return idx - c
-
-import seaborn as sns
-
-if __name__ == '__main__':
-    exp_id = '202207171754-2703'
-    gw = K3SGateway.from_env()
-    traces = gw.traces(exp_id)
-    pass
