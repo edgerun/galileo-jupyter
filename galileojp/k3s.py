@@ -17,6 +17,7 @@ from galileofaas.context.platform.replica.model import parse_function_replica, K
 from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDeployment, \
     KubernetesResourceConfiguration
 from galileofaas.util.storage import parse_size_string_to_bytes
+from matplotlib import pyplot as plt
 from skippy.core.model import ResourceRequirements
 
 from galileojp import env
@@ -247,7 +248,7 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         return pd.DataFrame(data=data).sort_values(by='ts')
 
-    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None, per_second: bool = True):
+    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None,per_second:bool= True):
         if clusters is None:
             clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
         sc_df_running = self.get_replicas(exp_id, state='running')
@@ -269,6 +270,10 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         for cluster in clusters:
             cluster_total[cluster] = 0
+            data['ts'].append(0)
+            data['total'].append(0)
+            data['cluster'].append(cluster)
+            data['cluster_total'].append(0)
 
         for _, row in sc_df.iterrows():
             if row['state'] == 'pending' or row['state'] == 'create' or row['state'] == 'shutdown':
@@ -276,12 +281,11 @@ class K3SGateway(MixedExperimentFrameGateway):
 
             add = row['state'] == 'running'
             ts = row['ts']
-
+            last_ts = data['ts'][-1]
+            diff = ts - last_ts
             cluster = row['cluster']
 
             if per_second:
-                last_ts = data['ts'][-1]
-                diff = ts - last_ts
                 for i in range(0, math.floor(diff), 1):
                     for other_cluster in ['Cloud', 'IoT-Box', 'Cloudlet']:
                         if other_cluster != cluster:
@@ -293,10 +297,7 @@ class K3SGateway(MixedExperimentFrameGateway):
 
             data['cluster'].append(cluster)
             data['ts'].append(ts)
-            if len(data['total']) == 0:
-                total = 0
-            else:
-                total = data['total'][-1]
+            total = data['total'][-1]
             if add:
                 data['total'].append(total + 1)
                 cluster_total[cluster] += 1
