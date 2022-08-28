@@ -54,8 +54,8 @@ class K3SGateway(MixedExperimentFrameGateway):
         nodes = list(self.get_nodes_by_name(exp_id).values())
         zones = set()
         for node in nodes:
-            if node.zone is not None:
-                zones.add(node.zone)
+            if node.cluster is not None:
+                zones.add(node.cluster)
         zones = list(zones)
         return InMemoryNodeService[KubernetesFunctionNode](zones, nodes)
 
@@ -394,7 +394,7 @@ class K3SGateway(MixedExperimentFrameGateway):
                 traces.loc[index, 'function'] = replica.labels.get(function_label, 'N/A')
                 dest_zone = replica.labels.get(zone_label, None)
                 if dest_zone is None:
-                    dest_zone = nodes[replica.node.name].zone
+                    dest_zone = nodes[replica.node.name].cluster
             traces.loc[index, 'dest_zone'] = dest_zone
             cluster = self.convert_cluster(dest_zone)
             traces.loc[index, 'dest_cluster'] = cluster
@@ -545,8 +545,8 @@ class K3SGateway(MixedExperimentFrameGateway):
             df = self.get_cpu_container(exp_id, container.container_id, absolute=absolute)
 
             if df is not None:
-                df['zone'] = container.zone
-                cluster = self.convert_cluster(container.zone)
+                df['zone'] = container.cluster
+                cluster = self.convert_cluster(container.cluster)
                 df['cluster'] = cluster
                 df['name'] = container.name
                 df['id'] = container.container_id
