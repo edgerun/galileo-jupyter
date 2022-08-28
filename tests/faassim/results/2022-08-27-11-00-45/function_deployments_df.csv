@@ -1,0 +1,8 @@
+time,name,type
+2022-08-27 11:00:45.286554,resnet50-inference,deploy
+2022-08-27 11:00:45.286933,resnet50-training,deploy
+2022-08-27 11:00:45.295493,client-resnet50-inference-0-nuc_1,deploy
+2022-08-27 11:00:45.295823,client-resnet50-training-0-nuc_2,deploy
+2022-08-27 11:00:45.296109,lb-load-balancer-0-asrock_0,deploy
+2022-08-27 11:00:45.296691,lb-load-balancer-1-cloudvm_0,deploy
+2022-08-27 11:00:45.297254,lb-load-balancer-2-xeoncpu_0,deploy

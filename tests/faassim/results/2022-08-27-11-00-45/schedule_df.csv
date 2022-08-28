@@ -1,0 +1,22 @@
+time,value,function_name,image,replica_id,node_name,successful
+2022-08-27 11:00:45.286856,queue,resnet50-inference,resnet50-inference-cpu,resnet50-inference-c4a53ac26970a0b050ff7,,
+2022-08-27 11:00:45.287164,queue,resnet50-training,resnet50-training-cpu,resnet50-training-d4585a0efca44881a4d87,,
+2022-08-27 11:00:45.287322,start,resnet50-inference,resnet50-inference-cpu,resnet50-inference-c4a53ac26970a0b050ff7,,
+2022-08-27 11:00:45.295399,finish,resnet50-inference,resnet50-inference-cpu,resnet50-inference-c4a53ac26970a0b050ff7,asrock_0,True
+2022-08-27 11:00:45.295747,queue,client-resnet50-inference-0-nuc_1,galileo-worker,client-resnet50-inference-0-nuc_1-948d3920b39b7adc7ead2,,
+2022-08-27 11:00:45.296048,queue,client-resnet50-training-0-nuc_2,galileo-worker,client-resnet50-training-0-nuc_2-640aebd777ce46db34413,,
+2022-08-27 11:00:45.296619,queue,lb-load-balancer-0-asrock_0,load-balancer,lb-load-balancer-0-asrock_0-54909897bf71e35f05c32,,
+2022-08-27 11:00:45.297189,queue,lb-load-balancer-1-cloudvm_0,load-balancer,lb-load-balancer-1-cloudvm_0-441379c023a73b17804dd,,
+2022-08-27 11:00:45.297707,queue,lb-load-balancer-2-xeoncpu_0,load-balancer,lb-load-balancer-2-xeoncpu_0-141c8ab847b624b7c0734,,
+2022-08-27 11:00:45.298369,start,resnet50-training,resnet50-training-cpu,resnet50-training-d4585a0efca44881a4d87,,
+2022-08-27 11:00:45.301295,finish,resnet50-training,resnet50-training-cpu,resnet50-training-d4585a0efca44881a4d87,asrock_0,True
+2022-08-27 11:00:45.301798,start,client-resnet50-inference-0-nuc_1,galileo-worker,client-resnet50-inference-0-nuc_1-948d3920b39b7adc7ead2,,
+2022-08-27 11:00:45.303929,finish,client-resnet50-inference-0-nuc_1,galileo-worker,client-resnet50-inference-0-nuc_1-948d3920b39b7adc7ead2,nuc_1,True
+2022-08-27 11:00:45.304139,start,client-resnet50-training-0-nuc_2,galileo-worker,client-resnet50-training-0-nuc_2-640aebd777ce46db34413,,
+2022-08-27 11:00:45.306258,finish,client-resnet50-training-0-nuc_2,galileo-worker,client-resnet50-training-0-nuc_2-640aebd777ce46db34413,nuc_2,True
+2022-08-27 11:00:45.306561,start,lb-load-balancer-0-asrock_0,load-balancer,lb-load-balancer-0-asrock_0-54909897bf71e35f05c32,,
+2022-08-27 11:00:45.308693,finish,lb-load-balancer-0-asrock_0,load-balancer,lb-load-balancer-0-asrock_0-54909897bf71e35f05c32,asrock_0,True
+2022-08-27 11:00:45.308987,start,lb-load-balancer-1-cloudvm_0,load-balancer,lb-load-balancer-1-cloudvm_0-441379c023a73b17804dd,,
+2022-08-27 11:00:45.311183,finish,lb-load-balancer-1-cloudvm_0,load-balancer,lb-load-balancer-1-cloudvm_0-441379c023a73b17804dd,cloudvm_0,True
+2022-08-27 11:00:45.311497,start,lb-load-balancer-2-xeoncpu_0,load-balancer,lb-load-balancer-2-xeoncpu_0-141c8ab847b624b7c0734,,
+2022-08-27 11:00:45.313608,finish,lb-load-balancer-2-xeoncpu_0,load-balancer,lb-load-balancer-2-xeoncpu_0-141c8ab847b624b7c0734,xeoncpu_0,True
