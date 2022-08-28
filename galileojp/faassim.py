@@ -28,17 +28,23 @@ class FaasSimGateway(ExperimentFrameGateway):
         return None
 
     def nodeinfo(self, *exp_ids):
-        # TODO save this from simulation
-        return None
+        dfs = []
+        for exp_id in exp_ids:
+            df = pd.read_csv(f'{self._get_exp_folder(exp_id)}/nodes.csv')
+            df['exp_id'] = exp_id
+            dfs.append(df)
+        return pd.concat(dfs)
 
     def events(self, *exp_ids):
         return None
 
+    def _get_exp_folder(self, exp_id):
+        return f'{self.root_dir}/{exp_id}'
     def telemetry(self, *exp_ids) -> pd.DataFrame:
         dfs = []
         for exp_id in exp_ids:
-            node_utilization_df = pd.read_csv(f'{self.root_dir}/{exp_id}/node_utilization_df.csv')
-            replica_utilization_df = pd.read_csv(f'{self.root_dir}/{exp_id}/function_utilization_df.csv')
+            node_utilization_df = pd.read_csv(f'{self._get_exp_folder(exp_id)}/node_utilization_df.csv')
+            replica_utilization_df = pd.read_csv(f'{self._get_exp_folder(exp_id)}/function_utilization_df.csv')
             node_utilization_df['exp_id'] = exp_id
             replica_utilization_df['exp_id'] = exp_id
             dfs.append(node_utilization_df)
@@ -48,7 +54,7 @@ class FaasSimGateway(ExperimentFrameGateway):
     def traces(self, *exp_ids) -> pd.DataFrame:
         dfs = []
         for exp_id in exp_ids:
-            traces_df = pd.read_csv(f'{self.root_dir}/{exp_id}/traces_df.csv')
+            traces_df = pd.read_csv(f'{self._get_exp_folder(exp_id)}/traces_df.csv')
             traces_df['exp_id'] = exp_id
             dfs.append(traces_df)
         return pd.concat(dfs)

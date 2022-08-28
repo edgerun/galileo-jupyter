@@ -31,3 +31,7 @@ class TestFaasSim(unittest.TestCase):
     def test_get_traces_for_one_experiment(self):
         traces_df = self.sim_gateway.traces(self.exp_1)
         self.assertTrue(len(traces_df) > 0)
+
+    def test_get_nodeinfos_for_one_experiment(self):
+        nodes_df = self.sim_gateway.nodeinfo(self.exp_1)
+        self.assertTrue(len(nodes_df) > 0)
