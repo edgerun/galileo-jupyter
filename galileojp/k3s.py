@@ -8,7 +8,7 @@ from typing import Dict, Optional, List
 
 import pandas as pd
 from faas.context import NodeService, FunctionDeploymentService, InMemoryNodeService, InMemoryDeploymentService
-from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment
+from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment, FunctionNode
 from galileodb.factory import create_mysql_from_env, create_influxdb_from_env
 from galileodb.influx.db import InfluxExperimentDatabase
 from galileodb.sql.adapter import ExperimentSQLDatabase
@@ -17,7 +17,6 @@ from galileofaas.context.platform.replica.model import parse_function_replica, K
 from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDeployment, \
     KubernetesResourceConfiguration
 from galileofaas.util.storage import parse_size_string_to_bytes
-from matplotlib import pyplot as plt
 from skippy.core.model import ResourceRequirements
 
 from galileojp import env
@@ -190,20 +189,23 @@ class K3SGateway(MixedExperimentFrameGateway):
                 if cpu == '1':
                     allocatable['cpu'] = '1000m'
 
-            data[name] = KubernetesFunctionNode(
+            fn_node = FunctionNode(
                 name=name,
                 arch=arch,
                 cpus=cpus,
                 ram=ram,
+                netspeed=netspeed,
+                labels=labels,
+                allocatable=allocatable,
+                cluster=cluster,
+                state=NodeState.READY
+            )
+            data[name] = KubernetesFunctionNode(
+                fn_node=fn_node,
                 boot=boot,
                 disk=disk,
                 net=net,
-                netspeed=netspeed,
-                labels=labels,
-                zone=zone,
-                allocatable=allocatable,
-                cluster=cluster,
-                state=NodeState.READY)
+            )
 
         return data
 
@@ -248,7 +250,7 @@ class K3SGateway(MixedExperimentFrameGateway):
 
         return pd.DataFrame(data=data).sort_values(by='ts')
 
-    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None,per_second:bool= True):
+    def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None, per_second: bool = True):
         if clusters is None:
             clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
         sc_df_running = self.get_replicas(exp_id, state='running')
