@@ -1,0 +1,8 @@
+time,value,function_name
+2022-08-30 15:48:18.494398,1,resnet50-inference
+2022-08-30 15:48:18.494398,1,resnet50-training
+2022-08-30 15:48:18.494398,1,client-resnet50-inference-0-nuc_1
+2022-08-30 15:48:18.494398,1,client-resnet50-training-0-nuc_2
+2022-08-30 15:48:18.494398,1,lb-load-balancer-0-asrock_0
+2022-08-30 15:48:18.494398,1,lb-load-balancer-1-cloudvm_0
+2022-08-30 15:48:18.494398,1,lb-load-balancer-2-xeoncpu_0

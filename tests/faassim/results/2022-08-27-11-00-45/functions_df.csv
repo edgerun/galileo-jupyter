@@ -1,8 +1,0 @@
-time,name,image,sizes
-2022-08-27 11:00:45.286542,resnet50-inference,resnet50-inference-cpu,"{'size_arm32': 56000000, 'size_x86': 56000000, 'size_aarch64': 56000000}"
-2022-08-27 11:00:45.286927,resnet50-training,resnet50-training-cpu,"{'size_arm32': 128000000, 'size_x86': 128000000, 'size_aarch64': 128000000}"
-2022-08-27 11:00:45.295486,client-resnet50-inference-0-nuc_1,galileo-worker,"{'size_arm32': 23000000, 'size_x86': 23000000, 'size_aarch64': 23000000}"
-2022-08-27 11:00:45.295817,client-resnet50-training-0-nuc_2,galileo-worker,"{'size_arm32': 23000000, 'size_x86': 23000000, 'size_aarch64': 23000000}"
-2022-08-27 11:00:45.296104,lb-load-balancer-0-asrock_0,load-balancer,"{'size_arm32v7': 10000000, 'size_x86': 10000000, 'size_arm64v8': 10000000}"
-2022-08-27 11:00:45.296685,lb-load-balancer-1-cloudvm_0,load-balancer,"{'size_arm32v7': 10000000, 'size_x86': 10000000, 'size_arm64v8': 10000000}"
-2022-08-27 11:00:45.297248,lb-load-balancer-2-xeoncpu_0,load-balancer,"{'size_arm32v7': 10000000, 'size_x86': 10000000, 'size_arm64v8': 10000000}"

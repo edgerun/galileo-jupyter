@@ -1,8 +1,0 @@
-time,value,name,image,function_id,node
-2022-08-27 11:00:45.297940,deploy,resnet50-inference,resnet50-inference-cpu,139877503549008,asrock_0
-2022-08-27 11:00:45.301407,deploy,resnet50-training,resnet50-training-cpu,139877503570368,asrock_0
-2022-08-27 11:00:45.304036,deploy,client-resnet50-inference-0-nuc_1,galileo-worker,139877503573776,nuc_1
-2022-08-27 11:00:45.306463,deploy,client-resnet50-training-0-nuc_2,galileo-worker,139877503586896,nuc_2
-2022-08-27 11:00:45.308887,deploy,lb-load-balancer-0-asrock_0,load-balancer,139877503571328,asrock_0
-2022-08-27 11:00:45.311391,deploy,lb-load-balancer-1-cloudvm_0,load-balancer,139877503572144,cloudvm_0
-2022-08-27 11:00:45.313806,deploy,lb-load-balancer-2-xeoncpu_0,load-balancer,139877503572960,xeoncpu_0
