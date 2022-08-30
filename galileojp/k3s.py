@@ -229,6 +229,7 @@ class K3SGateway(MixedExperimentFrameGateway):
                 continue
             data['ts'].append(float(row['ts']) - start_trace)
             data['podUid'].append(replica.replica_id)
+            data['replica_id'].append(replica.replica_id)
             data['name'].append(replica.pod_name)
             data['hostIP'].append(replica.host_ip)
             data['podIP'].append(replica.ip)
@@ -247,6 +248,7 @@ class K3SGateway(MixedExperimentFrameGateway):
             data['cluster'].append(cluster)
             data['fn'].append(replica.labels.get(function_label, 'N/A'))
             data['pod_type'].append(replica.labels.get(pod_type_label, 'N/A'))
+            data['replica_type'].append(replica.labels.get(pod_type_label, 'N/A'))
 
         return pd.DataFrame(data=data).sort_values(by='ts')
 
