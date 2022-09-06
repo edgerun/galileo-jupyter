@@ -8,8 +8,8 @@ class TestFaasSim(unittest.TestCase):
     def setUp(self) -> None:
         root_dir = f'./results/'
         self.sim_gateway = FaasSimGateway(root_dir)
-        self.exp_1 = '20220830154811-ce87'
-        self.exp_2 = '20220830154818-f1bb'
+        self.exp_1 = '20220906152903-6627'
+        self.exp_2 = '20220906152858-fe81'
         self.resnet_inference_fn = 'resnet50-inference'
 
     def test_get_experiments(self):

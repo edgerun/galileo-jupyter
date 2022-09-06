@@ -1,2 +1,0 @@
-time,EXP_ID,START,END,CREATED,STATUS,metadata
-2022-08-30 15:49:57.562091,20220830154818-f1bb,1661870898.4953136,1661870899.8228564,1661870898.4950924,FINISHED,"{'benchmark': 'DecentralizedLoadBalancerTrainInferenceBenchmark', 'function_deployments': ['resnet50-inference', 'resnet50-training'], 'client_deployments': ['client-resnet50-inference-0-nuc_1', 'client-resnet50-training-0-nuc_2'], 'load_balancer_deployments': ['lb-load-balancer-0-asrock_0', 'lb-load-balancer-1-cloudvm_0', 'lb-load-balancer-2-xeoncpu_0']}"

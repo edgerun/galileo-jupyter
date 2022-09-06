@@ -1,0 +1,8 @@
+time,name,labels
+2022-09-06 15:29:03.308837,resnet50-inference,{'ether.edgerun.io/function': 'resnet50-inference'}
+2022-09-06 15:29:03.308837,resnet50-training,{'ether.edgerun.io/function': 'resnet50-training'}
+2022-09-06 15:29:03.308837,client-resnet50-inference-0-nuc_1,{}
+2022-09-06 15:29:03.308837,client-resnet50-training-0-nuc_2,{}
+2022-09-06 15:29:03.308837,lb-load-balancer-0-asrock_0,"{'ether.edgerun.io/function': 'api-gateway', 'node-role.kubernetes.io/controller': 'true', 'ether.edgerun.io/zone': 'IoT-Box'}"
+2022-09-06 15:29:03.308837,lb-load-balancer-1-cloudvm_0,"{'ether.edgerun.io/function': 'api-gateway', 'node-role.kubernetes.io/controller': 'true', 'ether.edgerun.io/zone': 'Cloud'}"
+2022-09-06 15:29:03.308837,lb-load-balancer-2-xeoncpu_0,"{'ether.edgerun.io/function': 'api-gateway', 'node-role.kubernetes.io/controller': 'true', 'ether.edgerun.io/zone': 'Cloudlet'}"
