@@ -4,6 +4,7 @@ import logging
 import math
 import re
 from collections import defaultdict
+from pathlib import Path
 from typing import Dict, Optional, List
 
 import pandas as pd
@@ -58,6 +59,45 @@ class K3SGateway(MixedExperimentFrameGateway):
                 zones.add(node.cluster)
         zones = list(zones)
         return InMemoryNodeService[KubernetesFunctionNode](zones, nodes)
+
+    def export(self, exp_id: str, folder_path: str):
+        exp_folder = f'{folder_path}/{exp_id}'
+        exp: pd.DataFrame = self.get_experiment(exp_id)
+        if len(exp) == 0:
+            logger.info(f'No experiment found with ID {exp_id} - aborting export.')
+            return False
+
+        try:
+            Path(exp_folder).mkdir(parents=True, exist_ok=False)
+        except Exception as e:
+            logger.error('Error, abort export', e)
+            return
+
+        logger.info(f'Saving experiment {exp_id} under {exp_folder}')
+
+        # save experiment from sql db including metadata
+        exp_csv_file = f'{exp_folder}/experiment.csv'
+        exp.to_csv(exp_csv_file, index=False)
+
+        # save telemetry
+        telemetry_df = self.telemetry(exp_id)
+        telemetry_csv_file = f'{exp_folder}/telemetry.csv'
+        logger.info(f'Save {len(telemetry_df)} events in {telemetry_csv_file}')
+        telemetry_df.to_csv(telemetry_csv_file, index=False)
+
+        # save traces
+        traces_df = self.traces(exp_id)
+        traces_csv_file = f'{exp_folder}/traces.csv'
+        logger.info(f'Save {len(traces_df)} events in {traces_csv_file}')
+        traces_df.to_csv(traces_csv_file, index=False)
+
+        # save events
+        events_df = self.events(exp_id)
+        events_csv_file = f'{exp_folder}/events.csv'
+        logger.info(f'Save {len(events_df)} events in {events_csv_file}')
+        events_df.to_csv(events_csv_file, index=False)
+
+        logger.info(f'Successfully saved experiment with ID {exp_id}')
 
     def parse_container_request(self, container_requests):
         for k, v in container_requests.items():

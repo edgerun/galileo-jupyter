@@ -45,6 +45,12 @@ class ExperimentFrameGateway(abc.ABC):
     def from_env() -> 'ExperimentFrameGateway':
         raise NotImplementedError()
 
+    def delete(self, exp_id: str):
+        raise NotImplementedError()
+
+    def export(self, exp_id: str, folder_path: str):
+        raise NotImplementedError()
+
 
 class MixedExperimentFrameGateway(ExperimentFrameGateway):
 
@@ -135,6 +141,8 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
             raise ValueError("Empty dataframes")
         df.rename(columns={'_value': 'value'}, inplace=True)
         df.index = pd.DatetimeIndex(pd.to_datetime(df[time_col], unit='s'))
+        influxdb_drop_columns = ['result', 'table', '_start', '_stop', '_time', '_field', '_measurement']
+        df = df.drop(influxdb_drop_columns, axis=1)
         return df
 
     @staticmethod
@@ -145,6 +153,10 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
         sqldb = create_mysql_from_env()
         sqldb.open()
         return MixedExperimentFrameGateway(influxdb, sqldb)
+
+    def delete(self, exp_id: str):
+        self.influxdb.delete_experiment(exp_id)
+        self.sqldb.delete_experiment(exp_id)
 
 
 class SqlExperimentFrameGateway(ExperimentFrameGateway):
