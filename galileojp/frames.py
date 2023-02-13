@@ -73,7 +73,7 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
         return self.influxdb.client
 
     def experiments(self) -> pd.DataFrame:
-        experiments = pd.read_sql(f'SELECT * FROM experiments', con=self._sql_con)
+        experiments = pd.read_sql(f'SELECT * FROM experiments', con=self.sqldb.db.connection)
         experiments['metadata'] = '{}'
         metadata_df = self.metadata()
         for exp in experiments.iterrows():
@@ -87,7 +87,7 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
 
     def metadata(self, exp_id: str = None) -> Optional[Union[pd.DataFrame, Dict]]:
         if exp_id is None:
-            return pd.read_sql('SELECT * FROM metadata', con=self._sql_con)
+            return pd.read_sql('SELECT * FROM metadata', con=self.sqldb.db.connection)
         else:
             sql = f"SELECT * FROM metadata WHERE EXP_ID = '{exp_id}'"
             metadata = pd.read_sql(sql, con=self._sql_con)
@@ -103,7 +103,7 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
 
         idlist = to_idlist(exp_ids)
 
-        df = pd.read_sql(f'SELECT * FROM nodeinfo WHERE exp_id in ({idlist})', con=self._sql_con)
+        df = pd.read_sql(f'SELECT * FROM nodeinfo WHERE exp_id in ({idlist})', con=self.sqldb.db.connection)
         return df
 
     def raw_influxdb_query(self, query: str) -> pd.DataFrame:
