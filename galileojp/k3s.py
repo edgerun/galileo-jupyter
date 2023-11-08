@@ -19,7 +19,7 @@ from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDe
     KubernetesResourceConfiguration
 from galileofaas.util.storage import parse_size_string_to_bytes
 from skippy.core.model import ResourceRequirements
-
+from faas.system.core import FunctionReplicaState
 from galileojp import env
 from galileojp.frames import MixedExperimentFrameGateway
 
@@ -267,6 +267,9 @@ class K3SGateway(MixedExperimentFrameGateway):
             replica = parse_function_replica(value, deployment_service, node_service)
             if replica is None:
                 continue
+            if replica.state == FunctionReplicaState.PENDING:
+                continue
+
             data['ts'].append(float(row['ts']) - start_trace)
             data['podUid'].append(replica.replica_id)
             data['replica_id'].append(replica.replica_id)
@@ -274,23 +277,28 @@ class K3SGateway(MixedExperimentFrameGateway):
             data['hostIP'].append(replica.host_ip)
             data['podIP'].append(replica.ip)
             data['startTime'].append(replica.start_time)
-            data['image'].append(replica.image)
+            data['image'].append(replica.image if replica.container is not None else 'NA')
             data['container_id'].append(replica.container_id)
             data['namespace'].append(replica.namespace)
             data['nodeName'].append(replica.node.name)
-            data['cpu_request'].append(replica.container.get_resource_requirements().get('cpu'))
-            data['mem_request'].append(replica.container.get_resource_requirements().get('memory'))
+            data['cpu_request'].append(
+                replica.container.get_resource_requirements().get('cpu') if replica.container is not None else 'NA')
+            data['mem_request'].append(
+                replica.container.get_resource_requirements().get('memory') if replica.container is not None else 'NA')
             data['state'].append(state)
             node_labels = replica.node.labels
-            zone = replica.labels.get(zone_label, node_labels.get(zone_label, 'N/A'))
+            zone = replica.labels.get(zone_label, node_labels.get(zone_label, 'N/A'))  if replica.container is not None else 'N/A'
             data['zone'].append(zone)
             cluster = self.convert_cluster(zone)
             data['cluster'].append(cluster)
-            data['fn'].append(replica.labels.get(function_label, 'N/A'))
-            data['pod_type'].append(replica.labels.get(pod_type_label, 'N/A'))
-            data['replica_type'].append(replica.labels.get(pod_type_label, 'N/A'))
-
-        return pd.DataFrame(data=data).sort_values(by='ts')
+            data['fn'].append(replica.labels.get(function_label, 'N/A') if replica.container is not None else 'N/A')
+            data['pod_type'].append(replica.labels.get(pod_type_label, 'N/A') if replica.container is not None else 'N/A')
+            data['replica_type'].append(replica.labels.get(pod_type_label, 'N/A') if replica.container is not None else 'N/A')
+        try:
+            return pd.DataFrame(data=data).sort_values(by='ts')
+        except KeyError:
+            print('Probably no scale down happened!')
+            return pd.DataFrame(data=data)
 
     def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None, per_second: bool = True):
         if clusters is None:
@@ -319,7 +327,7 @@ class K3SGateway(MixedExperimentFrameGateway):
             data['cluster'].append(cluster)
             data['cluster_total'].append(0)
 
-        for _, row in sc_df.iterrows():
+        for sc_df_idx, row in sc_df.iterrows():
             if row['state'] == 'pending' or row['state'] == 'create' or row['state'] == 'shutdown':
                 continue
 
