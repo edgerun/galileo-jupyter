@@ -82,20 +82,32 @@ class K3SGateway(MixedExperimentFrameGateway):
         # save telemetry
         telemetry_df = self.telemetry(exp_id)
         telemetry_csv_file = f'{exp_folder}/telemetry.csv'
-        logger.info(f'Save {len(telemetry_df)} events in {telemetry_csv_file}')
+        logger.info(f'Save {len(telemetry_df)} telemetry in {telemetry_csv_file}')
         telemetry_df.to_csv(telemetry_csv_file, index=False)
 
         # save traces
         traces_df = self.traces(exp_id)
         traces_csv_file = f'{exp_folder}/traces.csv'
-        logger.info(f'Save {len(traces_df)} events in {traces_csv_file}')
+        logger.info(f'Save {len(traces_df)} traces in {traces_csv_file}')
         traces_df.to_csv(traces_csv_file, index=False)
+
+        # save raw traces
+        raw_traces_df = super().traces(exp_id)
+        raw_traces_csv_file = f'{exp_folder}/raw_traces.csv'
+        logger.info(f'Save {len(raw_traces_df)} raw traces in {raw_traces_csv_file}')
+        raw_traces_df.to_csv(raw_traces_csv_file, index=False)
 
         # save events
         events_df = self.events(exp_id)
         events_csv_file = f'{exp_folder}/events.csv'
         logger.info(f'Save {len(events_df)} events in {events_csv_file}')
         events_df.to_csv(events_csv_file, index=False)
+
+        # save nodeinfos
+        node_info_df = self.nodeinfo(exp_id)
+        nodeinfo_csv_file = f'{exp_folder}/nodeinfo.csv'
+        logger.info(f'Save {len(node_info_df)} nodeinfos in {nodeinfo_csv_file}')
+        node_info_df.to_csv(events_csv_file, index=False)
 
         logger.info(f'Successfully saved experiment with ID {exp_id}')
 
