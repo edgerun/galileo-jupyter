@@ -107,7 +107,7 @@ class K3SGateway(MixedExperimentFrameGateway):
         node_info_df = self.nodeinfo(exp_id)
         nodeinfo_csv_file = f'{exp_folder}/nodeinfo.csv'
         logger.info(f'Save {len(node_info_df)} nodeinfos in {nodeinfo_csv_file}')
-        node_info_df.to_csv(events_csv_file, index=False)
+        node_info_df.to_csv(nodeinfo_csv_file, index=False)
 
         logger.info(f'Successfully saved experiment with ID {exp_id}')
 
