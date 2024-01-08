@@ -565,7 +565,7 @@ class K3SGateway(MixedExperimentFrameGateway):
                 data['ip'].append(ip)
                 data['weight'].append(weight)
         df = pd.DataFrame(data=data)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df['ts'], unit='s'))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df['ts'].astype(float), unit='s'))
         df.index = self.normalize_index(df.index, exp_id)
         return df
 
@@ -595,7 +595,7 @@ class K3SGateway(MixedExperimentFrameGateway):
         if len(df) == 0:
             return None
         df.rename(columns={'_value': 'value'}, inplace=True)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df['ts'], unit='s'))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df['ts'].astype(float), unit='s'))
         # scale such that every index starts at 1970-01-01
         df.index = self.normalize_index(df.index, exp_id)
         return df
@@ -771,3 +771,11 @@ class K3SGateway(MixedExperimentFrameGateway):
         b = datetime.datetime.fromisoformat('1970-01-01')
         c = a - b
         return idx - c
+
+def main():
+    gw = K3SGateway.from_env()
+    traces = gw.traces('202401080108-ac98')
+    pass
+
+if __name__ == '__main__':
+    main()

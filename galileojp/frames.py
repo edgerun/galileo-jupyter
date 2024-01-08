@@ -140,7 +140,7 @@ class MixedExperimentFrameGateway(ExperimentFrameGateway):
         if len(df) == 0:
             raise ValueError("Empty dataframes")
         df.rename(columns={'_value': 'value'}, inplace=True)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df[time_col], unit='s'))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df[time_col].astype(float), unit='s'))
         influxdb_drop_columns = ['result', 'table', '_start', '_stop', '_time', '_field', '_measurement']
         df = df.drop(influxdb_drop_columns, axis=1)
         return df
@@ -210,7 +210,7 @@ class SqlExperimentFrameGateway(ExperimentFrameGateway):
         idlist = to_idlist(exp_ids)
 
         df = pd.read_sql(f'SELECT * FROM events WHERE exp_id in ({idlist})', con=self._con)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df['TIMESTAMP'], unit='s'))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df['TIMESTAMP'].astype(float), unit='s'))
         return df
 
     def telemetry(self, *exp_ids) -> pd.DataFrame:
@@ -220,7 +220,7 @@ class SqlExperimentFrameGateway(ExperimentFrameGateway):
         idlist = to_idlist(exp_ids)
 
         df = pd.read_sql(f'SELECT * FROM telemetry WHERE exp_id in ({idlist})', con=self._con)
-        df.index = pd.DatetimeIndex(pd.to_datetime(df['TIMESTAMP'], unit='s'))
+        df.index = pd.DatetimeIndex(pd.to_datetime(df['TIMESTAMP'].astype(float), unit='s'))
         return df
 
     @staticmethod
