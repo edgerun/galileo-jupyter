@@ -5,15 +5,11 @@ import math
 import os
 import re
 from collections import defaultdict
-from pathlib import Path
 from typing import Dict, Optional, List
 
 import pandas as pd
 from faas.context import NodeService, FunctionDeploymentService, InMemoryNodeService, InMemoryDeploymentService
 from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment, FunctionNode
-from galileodb.factory import create_mysql_from_env, create_influxdb_from_env
-from galileodb.influx.db import InfluxExperimentDatabase
-from galileodb.sql.adapter import ExperimentSQLDatabase
 from galileofaas.constants import zone_label, function_label, pod_type_label
 from galileofaas.context.platform.replica.model import parse_function_replica, KubernetesFunctionReplica, Pod
 from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDeployment, \
@@ -21,8 +17,7 @@ from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDe
 from galileofaas.util.storage import parse_size_string_to_bytes
 from skippy.core.model import ResourceRequirements
 
-from galileojp import env
-from galileojp.frames import MixedExperimentFrameGateway, ExperimentFrameGateway
+from galileojp.frames import ExperimentFrameGateway
 
 logger = logging.getLogger()
 
