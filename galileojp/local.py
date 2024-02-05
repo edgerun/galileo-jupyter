@@ -673,6 +673,13 @@ class LocalGateway(ExperimentFrameGateway):
         # TODO this might be more efficient if we cache the result
         return pd.read_csv(f'{self.root}/{exp_id}/events.csv')
 
+    def events(self, *exp_ids):
+        all_dfs = []
+        for exp_id in exp_ids:
+            events = self.get_events(exp_id)
+            all_dfs.append(events)
+        return pd.concat(all_dfs)
+
     def get_traces(self, *exp_ids) -> pd.DataFrame:
         dfs = []
         for exp_id in exp_ids:
