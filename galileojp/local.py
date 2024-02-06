@@ -159,8 +159,9 @@ class LocalGateway(ExperimentFrameGateway):
         # EXP_ID 	NAME 	CREATOR 	START 	END 	CREATED 	STATUS 	metadata
         dfs = []
         for exp_id in self._get_directories():
-            df = self.get_experiment(exp_id)
-            dfs.append(df)
+            if os.path.isfile(f'{self.root}/{exp_id}/experiment.csv'):
+                df = self.get_experiment(exp_id)
+                dfs.append(df)
         return pd.concat(dfs)
 
     def get_exp_params(self, exp_id: str) -> Dict:
