@@ -414,6 +414,11 @@ class LocalGateway(ExperimentFrameGateway):
             final_server_ip = final_url[0].replace(' ', '')
             replica = replicas.get(final_server_ip)
             status = row['status']
+            try:
+                loaded_response = json.loads(row['response'])
+                traces.loc[index, 'fet'] = loaded_response['total_duration']
+            except Exception:
+                pass
             if replica is None or status != 200:
                 traces.loc[index, 'final_ip'] = 'N/A'
                 traces.loc[index, 'final_port'] = 'N/A'
