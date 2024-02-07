@@ -9,7 +9,8 @@ from typing import Dict, Optional, List
 
 import pandas as pd
 from faas.context import NodeService, FunctionDeploymentService, InMemoryNodeService, InMemoryDeploymentService
-from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment, FunctionNode
+from faas.system import NodeState, Function, FunctionImage, FunctionContainer, FunctionDeployment, FunctionNode, \
+    FunctionReplicaState
 from galileofaas.constants import zone_label, function_label, pod_type_label
 from galileofaas.context.platform.replica.model import parse_function_replica, KubernetesFunctionReplica, Pod
 from galileofaas.system.core import KubernetesFunctionNode, KubernetesFunctionDeployment, \
@@ -232,8 +233,16 @@ class LocalGateway(ExperimentFrameGateway):
 
         return data
 
+    def convert_to_timestamp(self, datetime_string):
+        datetime_format = "%Y-%m-%d %H:%M:%S.%f"
+        dt_object = pd.to_datetime(datetime_string, format=datetime_format)
+        timestamp = dt_object.timestamp()
+        return timestamp
+
+    # Example usage:
+
     def get_replicas(self, exp_id, state: Optional[str] = "running", deployment_service=None,
-                     node_service=None) -> pd.DataFrame:
+                     node_service=None) -> Optional[pd.DataFrame]:
         query_result = self.get_raw_replicas(exp_id, state)
         data = defaultdict(list)
         exp = self.get_experiment(exp_id)
@@ -248,9 +257,10 @@ class LocalGateway(ExperimentFrameGateway):
             value = row['value']
             state = row['state']
             replica = parse_function_replica(value, deployment_service, node_service)
-            if replica is None:
+            if replica is None or replica.state is FunctionReplicaState.PENDING or replica.state is FunctionReplicaState.CONCEIVED:
                 continue
-            data['ts'].append(float(row['ts']) - start_trace)
+            ts = self.convert_to_timestamp(row['ts'])
+            data['ts'].append(ts - start_trace)
             data['podUid'].append(replica.replica_id)
             data['replica_id'].append(replica.replica_id)
             data['name'].append(replica.pod_name)
@@ -259,8 +269,8 @@ class LocalGateway(ExperimentFrameGateway):
             data['startTime'].append(replica.start_time)
             data['image'].append(replica.image)
             data['container_id'].append(replica.container_id)
-            data['namespace'].append(replica.namespace)
             data['nodeName'].append(replica.node.name)
+            data['namespace'].append(replica.namespace)
             data['cpu_request'].append(replica.container.get_resource_requirements().get('cpu'))
             data['mem_request'].append(replica.container.get_resource_requirements().get('memory'))
             data['state'].append(state)
@@ -272,15 +282,24 @@ class LocalGateway(ExperimentFrameGateway):
             data['fn'].append(replica.labels.get(function_label, 'N/A'))
             data['pod_type'].append(replica.labels.get(pod_type_label, 'N/A'))
             data['replica_type'].append(replica.labels.get(pod_type_label, 'N/A'))
-
-        return pd.DataFrame(data=data).sort_values(by='ts')
+        if len(data) > 0:
+            return pd.DataFrame(data=data).sort_values(by='ts')
+        else:
+            return None
 
     def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None, per_second: bool = True):
         if clusters is None:
             clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
+
+        dfs = []
         sc_df_running = self.get_replicas(exp_id, state='running')
+        if sc_df_running is not None:
+            dfs.append(sc_df_running)
         sc_df_delete = self.get_replicas(exp_id, state='delete')
-        sc_df = pd.concat([sc_df_running, sc_df_delete])
+        if sc_df_delete is not None:
+            dfs.append(sc_df_delete)
+
+        sc_df = pd.concat(dfs)
         sc_df = sc_df[sc_df['image'].str.contains(fn)].sort_values(by='ts')
 
         def rindex(mylist, myvalue):
