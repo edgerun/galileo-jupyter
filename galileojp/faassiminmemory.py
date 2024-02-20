@@ -280,7 +280,7 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
         nodes_by_name = self.get_nodes_by_name(exp_id)
         conceived_replicas = self.get_conceived_replicas_by_replica_id(exp_id)
         exp = self.get_experiment(exp_id)
-        start_ts = exp.START.iloc[0]
+        start_ts = exp.START.iloc[0].timestamp()
         for _, row in raw_replicas.iterrows():
             state = row['value']
             ts = row['time'].timestamp()
@@ -357,7 +357,7 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
         exp = self.get_experiment(exp_id)
         end = exp.END.iloc[0]
         start = exp.START.iloc[0]
-        end_scaled = end - start
+        end_scaled = (end.timestamp() - start.timestamp())
 
         for cluster in clusters:
             cluster_total[cluster] = 0
@@ -377,11 +377,18 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
             cluster = row['cluster']
 
             if per_second:
-                floor = math.floor(diff)
-                for i in range(0, floor, 1):
+                for i in range(0, math.ceil(diff), 1):
+                    for other_cluster in all_clusters:
+                        # if other_cluster != cluster:
+                        data['ts'].append(last_ts + i)
+                        data['total'].append(data['total'][-1])
+                        idx = rindex(data['cluster'], other_cluster)
+                        data['cluster'].append(other_cluster)
+                        data['cluster_total'].append(data['cluster_total'][idx])
+                if math.floor(diff) == 0:
                     for other_cluster in all_clusters:
                         if other_cluster != cluster:
-                            data['ts'].append(last_ts + i)
+                            data['ts'].append(ts)
                             data['total'].append(data['total'][-1])
                             idx = rindex(data['cluster'], other_cluster)
                             data['cluster'].append(other_cluster)
@@ -409,8 +416,9 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
 
         df = pd.DataFrame(data=data)
         df['exp_id'] = exp_id
-        df['ts'] = df['ts'].apply(lambda x: datetime.utcfromtimestamp(x))
-        return df
+        # df['ts'] = df['ts'].apply(lambda x: datetime.utcfromtimestamp(x))
+        df['ts'] = df['ts'].apply(lambda x: math.ceil(x))
+        return df.groupby(['ts', 'cluster']).max().reset_index()
 
     def get_replicas_with_shutdown(self, exp_id) -> Optional[pd.DataFrame]:
         exp = self.get_experiment(exp_id)
