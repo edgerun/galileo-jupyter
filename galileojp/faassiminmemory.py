@@ -200,6 +200,8 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
         for _, row in replicas.iterrows():
             replica_id = row['replica_id']
             fn_name = row['name']
+            if fn_name != 'pythonpi':
+                continue
             fn_image = row['image']
             deployment = deployments[fn_name]
             container = containers_by_name[(fn_name, fn_image)]
