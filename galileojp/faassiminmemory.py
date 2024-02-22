@@ -111,6 +111,8 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
             states = ['create', 'pending', 'running', 'shutdown', 'delete']
 
         replica_deployment_df = self._get_replica_deployment_df(exp_id)
+        if len(replica_deployment_df) == 0:
+            return None
         schedule_df = self._get_schedule_df(exp_id)
         schedule_df = schedule_df[schedule_df['value'] == 'queue']
         schedule_df['value'] = 'pending'
@@ -278,6 +280,8 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
 
     def get_replicas(self, exp_id, state: Optional[str] = "running"):
         raw_replicas = self.get_raw_replicas(exp_id, state).reset_index()
+        if len(raw_replicas) == 0:
+            return None
         data = defaultdict(list)
         nodes_by_name = self.get_nodes_by_name(exp_id)
         conceived_replicas = self.get_conceived_replicas_by_replica_id(exp_id)
@@ -289,6 +293,9 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
             if conceived_replica is None:
                 continue
             state = row['value']
+            fn_name = row['function_name']
+            if fn_name != 'pythonpi':
+                continue
             ts = row['time'].timestamp()
             data['ts'].append(ts - start_ts)
             data['replica_id'].append(replica_id)
