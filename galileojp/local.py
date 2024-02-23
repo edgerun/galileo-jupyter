@@ -287,9 +287,18 @@ class LocalGateway(ExperimentFrameGateway):
         else:
             return None
 
+    def get_clusters(self, exp_id: str) -> List[str]:
+        nodes = self.get_nodes_by_name(exp_id)
+        clusters = set()
+        for node in nodes.values():
+            if node.cluster is not None:
+                clusters.add(node.cluster)
+        return list(clusters)
+
     def get_replica_schedule_statistics(self, exp_id, fn: str, clusters: List[str] = None, per_second: bool = True):
+        all_clusters = self.get_clusters(exp_id)
         if clusters is None:
-            clusters = ['Cloud', 'IoT-Box', 'Cloudlet']
+            clusters = all_clusters
 
         dfs = []
         sc_df_running = self.get_replicas(exp_id, state='running')
@@ -332,10 +341,18 @@ class LocalGateway(ExperimentFrameGateway):
             cluster = row['cluster']
 
             if per_second:
-                for i in range(0, math.floor(diff), 1):
-                    for other_cluster in ['Cloud', 'IoT-Box', 'Cloudlet']:
+                for i in range(0, math.ceil(diff), 1):
+                    for other_cluster in all_clusters:
+                        # if other_cluster != cluster:
+                        data['ts'].append(last_ts + i)
+                        data['total'].append(data['total'][-1])
+                        idx = rindex(data['cluster'], other_cluster)
+                        data['cluster'].append(other_cluster)
+                        data['cluster_total'].append(data['cluster_total'][idx])
+                if math.floor(diff) == 0:
+                    for other_cluster in all_clusters:
                         if other_cluster != cluster:
-                            data['ts'].append(last_ts + i)
+                            data['ts'].append(ts)
                             data['total'].append(data['total'][-1])
                             idx = rindex(data['cluster'], other_cluster)
                             data['cluster'].append(other_cluster)
@@ -354,7 +371,7 @@ class LocalGateway(ExperimentFrameGateway):
 
             data['cluster_total'].append(cluster_total[cluster])
 
-        for cluster in ['Cloud', 'IoT-Box', 'Cloudlet']:
+        for cluster in all_clusters:
             data['ts'].append(end_scaled)
             data['total'].append(data['total'][-1])
             idx = rindex(data['cluster'], cluster)
@@ -363,8 +380,11 @@ class LocalGateway(ExperimentFrameGateway):
 
         df = pd.DataFrame(data=data)
         df['exp_id'] = exp_id
+        # df['ts'] = df['ts'].apply(lambda x: datetime.datetime.utcfromtimestamp(x))
+        df['ts'] = df['ts'].apply(lambda x: math.ceil(x))
         df['ts'] = df['ts'].apply(lambda x: datetime.datetime.utcfromtimestamp(x))
-        return df
+
+        return  df.groupby(['ts', 'cluster']).max().reset_index()
 
     def get_raw_replicas(self, exp_id, state: Optional[str] = "running"):
         if state is not None:
