@@ -284,11 +284,13 @@ class InMemoryFaasSimGateway(ExperimentFrameGateway):
         exp = self.get_experiment(exp_id)
         start_ts = exp.START.iloc[0].timestamp()
         for _, row in raw_replicas.iterrows():
+            replica_id = row['replica_id']
+            conceived_replica = conceived_replicas.get(replica_id)
+            if conceived_replica is None:
+                continue
             state = row['value']
             ts = row['time'].timestamp()
             data['ts'].append(ts - start_ts)
-            replica_id = row['replica_id']
-            conceived_replica = conceived_replicas[replica_id]
             data['replica_id'].append(replica_id)
             start_time = None
             data['state'].append(state.lower())
